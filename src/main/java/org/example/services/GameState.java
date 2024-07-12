@@ -1,10 +1,12 @@
-package org.example.models;
+package org.example.services;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.models.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -80,6 +82,14 @@ public class GameState {
             case ROCK -> getRockMoves(figure);
             default -> new ArrayList<>();
         };
+    }
+
+    // * Получение фигуры по позиции
+    public Figure getFigureAtPosition(FigurePositionLetterEnum col, FigurePositionNumberEnum row) {
+        return Stream.concat(WhiteFiguresList.stream(), BlackFiguresList.stream())
+                .filter(figure -> figure.getHorizontalPos() == col && figure.getVerticalPos() == row)
+                .findFirst()
+                .orElse(null);
     }
 
     // * Логика для слона

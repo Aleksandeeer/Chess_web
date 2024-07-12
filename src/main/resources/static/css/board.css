@@ -5,3 +5,8 @@
 .chess-board td { border: 1px solid; width: 5em; height: 5em; text-align: center; vertical-align: middle; }
 .chess-board .white { background: #f0d9b5; }
 .chess-board .black { background: #b58863; }
+
+/*Подсветка возможного хода*/
+.possible-move {
+    background: yellow;
+}

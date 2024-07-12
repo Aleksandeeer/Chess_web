@@ -15,5 +15,10 @@ public class Move {
         this.newHorizontalPos = newHorizontalPos;
         this.newVerticalPos = newVerticalPos;
     }
+
+    // * Метод для получения позиции назначения
+    public String getDestination() {
+        return newHorizontalPos.toString().toLowerCase() + (newVerticalPos.ordinal() + 1);
+    }
 }
 
