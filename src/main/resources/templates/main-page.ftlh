@@ -11,45 +11,53 @@
         $(document).ready(function() {
             $(".chess-board td img").click(function() {
                 var cellId = $(this).parent().attr("id");
-                console.log("Clicked on cell: " + cellId); // Debug output
+                console.log("Clicked on cell: " + cellId);
                 $.ajax({
                     url: "/possible-moves/" + cellId,
                     method: "GET",
                     success: function(response) {
-                        console.log("Received moves: ", response); // Debug output
-                        // $("td").removeClass("possible-move");
+                        console.log("Received moves: ", response);
+                        clearHighlights(); // Очистка предыдущих подсветок
                         highlightMoves(response);
-                        // response.forEach(function(move) {
-                        //     $("#" + move).addClass("possible-move");
-                        // });
-                        // response.forEach(function(move) {
-                        //     $("#" + move).addClass("possible-move");
-                        //     // Вывод каждого возможного хода с помощью document.write
-                        //     document.write(move + "<br>");
-                        // });
                     },
                     error: function(xhr, status, error) {
-                        console.error("Error fetching possible moves: ", error); // Debug output
+                        console.error("Error fetching possible moves: ", error);
                         alert("Error fetching possible moves.");
                     }
                 });
             });
         });
 
-        function highlightMoves(moves) {
-            // Снимаем выделение со всех клеток перед выделением новых
-            $(".chess-board td").removeClass("highlighted");
+        // Функция для очистки предыдущих подсветок
+        function clearHighlights() {
+            const highlightedCells = document.querySelectorAll('.highlight');
+            highlightedCells.forEach(function(cell) {
+                cell.classList.remove('highlight');
+            });
+        }
 
-            // Выделяем клетки, соответствующие возможным ходам
+
+        // ? Выделение возможных шагов
+        function highlightMoves(moves) {
+            moves.forEach(function (move) {
+                const cell = document.getElementById(move);
+                if (cell) {
+                    cell.classList.add('highlight');
+                }
+            });
+        }
+
+
+        // ? Вывод возможных шагов
+        function printMoves(moves) {
             moves.forEach(function(move) {
-                var cellId = move.cellId; // Предположим, что в ответе есть список cellId для выделения
-                $("#" + cellId).addClass("possible-move");
+               document.writeln(move);
             });
         }
     </script>
     <style>
-        .possible-move {
-            background-color: yellow;
+        .highlight {
+            background-color: yellow !important; /* Используем !important для приоритета */
         }
     </style>
 </head>
