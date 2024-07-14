@@ -5,13 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class Figure {
     FigureColorEnum colorFigure;
     FigureTypeEnum typeFigure;
     FigurePositionLetterEnum horizontalPos;
     FigurePositionNumberEnum verticalPos;
-
-    @Setter
     Boolean isAlive;
 }

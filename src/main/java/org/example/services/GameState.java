@@ -315,4 +315,10 @@ public class GameState {
         return opponentFigures.stream().anyMatch(f -> f.getHorizontalPos() == horizontal && f.getVerticalPos() == vertical);
     }
 
+    public void removeFigureAtPosition(FigurePositionLetterEnum col, FigurePositionNumberEnum row, FigureColorEnum currentColor) {
+        List<Figure> opponentFigures = currentColor == FigureColorEnum.WHITE ? BlackFiguresList : WhiteFiguresList;
+        opponentFigures.removeIf(f -> f.getHorizontalPos() == col && f.getVerticalPos() == row);
+    }
+
+
 }

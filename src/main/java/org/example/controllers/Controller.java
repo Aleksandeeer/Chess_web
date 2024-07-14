@@ -16,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import org.example.services.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,6 +39,7 @@ public class Controller {
         model.addAttribute("WhiteFiguresList", game.getWhiteFiguresList());
         model.addAttribute("FigurePositionLetterEnum", FigurePositionLetterEnum.values());
         model.addAttribute("FigurePositionNumberEnum", FigurePositionNumberEnum.values());
+        System.out.println("MAIN-PAGE LOADED");
         return "main-page";
     }
 
@@ -63,10 +66,6 @@ public class Controller {
         char letter = position.charAt(0);
         int number = Character.getNumericValue(position.charAt(1));
 
-        //        game.getPossibleMoves(
-//                game.getFigureAtPosition(
-//                        FigurePositionLetterEnum.valueOf(String.valueOf(letter)), FigurePositionNumberEnum.values()[number - 1]));
-
         FigurePositionLetterEnum col = FigurePositionLetterEnum.valueOf(Character.toString(letter).toUpperCase());
         FigurePositionNumberEnum row = FigurePositionNumberEnum.values()[number - 1];
 
@@ -83,4 +82,50 @@ public class Controller {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/move-figure")
+    public ResponseEntity<GameState> moveFigure(@RequestParam("source") String source, @RequestParam("target") String target) {
+        try {
+            char sourceLetter = source.charAt(0);
+            int sourceNumber = Character.getNumericValue(source.charAt(1));
+            char targetLetter = target.charAt(0);
+            int targetNumber = Character.getNumericValue(target.charAt(1));
+
+            FigurePositionLetterEnum sourceCol = FigurePositionLetterEnum.valueOf(Character.toString(sourceLetter).toUpperCase());
+            FigurePositionNumberEnum sourceRow = FigurePositionNumberEnum.values()[sourceNumber - 1];
+            FigurePositionLetterEnum targetCol = FigurePositionLetterEnum.valueOf(Character.toString(targetLetter).toUpperCase());
+            FigurePositionNumberEnum targetRow = FigurePositionNumberEnum.values()[targetNumber - 1];
+
+            System.out.println("sourceCol:" + sourceCol + "\tsourceRow: " + sourceRow);
+            Figure figure = game.getFigureAtPosition(sourceCol, sourceRow);
+
+            if (figure != null) {
+                List<Move> possibleMoves = game.getPossibleMoves(figure);
+                boolean isValidMove = possibleMoves.stream().anyMatch(move ->
+                        move.getNewHorizontalPos() == targetCol && move.getNewVerticalPos() == targetRow);
+
+                if (isValidMove) {
+                    // Перемещение фигуры
+                    figure.setHorizontalPos(targetCol);
+                    figure.setVerticalPos(targetRow);
+
+                    // Удаление фигуры противника, если есть
+                    game.removeFigureAtPosition(targetCol, targetRow, figure.getColorFigure());
+
+                    System.out.println("setVerticalPos: " + targetRow + "\tsetHorizontalPos" + targetCol);
+
+                    return ResponseEntity.ok(game);
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
 }
