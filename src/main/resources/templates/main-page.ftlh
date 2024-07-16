@@ -13,82 +13,86 @@
 
         // ? Подсветка возможных ходов при нажатии на фигуру
         $(document).ready(function() {
-            $(".chess-board td img").click(function() { // todo: проверить без img (написать отдельный скрипт
-                                                        // todo: $(".chess-board td").click(function()
-                                                        // todo: возможно трабл в том что он проверяет полное совпадение на все атрибуты
-                var imgElement = $(this).get(0); // или $(this)[0], чтобы получить первый элемент из выборки
-                var isHighlighted = false;
-                possibleMoves.forEach(function(posMove) {
-                    if(posMove === imgElement) {
-                        isHighlighted = true;
+            $(".chess-board td").click(function() {
+                var parentCell = $(this);
+                var imgElement = parentCell.find("img").get(0);
+
+                if (selectedFigure) {
+                    var targetCellId = parentCell.attr("id");
+
+                    // Проверяем, является ли targetCellId допустимым ходом
+                    var isValidMove = possibleMoves.includes(targetCellId);
+
+                    if (isValidMove) {
+                        var sourceCellId = selectedFigure;
+                        console.log("Selected cell for move. Target: " + targetCellId + ", Source: " + sourceCellId);
+
+                        $.ajax({
+                            url: "/move-figure",
+                            method: "POST",
+                            data: {
+                                source: sourceCellId,
+                                target: targetCellId
+                            },
+                            success: function(response) {
+                                clearHighlights(); // Очистка предыдущих подсветок
+                                updateBoard(response);
+                                selectedFigure = null; // Сбрасываем выбранную фигуру после успешного хода
+                            },
+                            error: function(xhr, status, error) {
+                                alert("Error moving figure. Error: " + error);
+                            }
+                        });
+                    } else {
+                        console.log("Invalid move to cell: " + targetCellId);
                     }
-                });
-
-                console.log("isHighlighted:" + isHighlighted);
-
-                if (isHighlighted) { // todo: НЕ РАБОТАЕТ НИЧЕГО ПРОСТО ААААААААААААААААААААА
-                    var targetCellId = $(this).attr("id");
-                    var sourceCellId = $('.selected-figure').parent().attr("id"); // ID клетки с фигурой, которая двигается
-
-                    console.log("Moving to cell: " + targetCellId);
-                    $.ajax({
-                        url: "/move-figure",
-                        method: "POST",
-                        data: {
-                            source: sourceCellId,
-                            target: targetCellId
-                        },
-                        success: function(response) {
-                            console.log("Move successful: ", response);
-                            clearHighlights(); // Очистка предыдущих подсветок
-                            // Обновление отображения фигур
-                            updateBoard(response);
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error moving figure: ", error);
-                            alert("Error moving figure. Error: " + error);
-                        }
-                    });
                 } else {
-                    var cellId = $(this).parent().attr("id");
-                    selectedFigure = cellId;
-                    console.log("Clicked on cell: " + cellId);
-                    $.ajax({
-                        url: "/possible-moves/" + cellId,
-                        method: "GET",
-                        success: function(response) {
-                            console.log("Received moves: ", response);
-                            clearHighlights(); // Очистка предыдущих подсветок
-                            highlightMoves(response);
-                            possibleMoves = response;
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error fetching possible moves: ", error);
-                            alert("Error fetching possible moves. Error: " + error);
-                        }
-                    });
+                    if (imgElement) { // Проверка, что клик был по фигуре
+                        var cellId = parentCell.attr("id");
+                        selectedFigure = cellId;
+                        $('.selected-figure').removeClass('selected-figure'); // Удаление предыдущей подсветки
+                        $(imgElement).addClass('selected-figure'); // Подсветка новой фигуры
+                        console.log("Selected figure at cell: " + cellId);
+
+                        $.ajax({
+                            url: "/possible-moves/" + cellId,
+                            method: "GET",
+                            success: function(response) {
+                                clearHighlights(); // Очистка предыдущих подсветок
+                                highlightMoves(response);
+                                possibleMoves = response;
+                            },
+                            error: function(xhr, status, error) {
+                                alert("Error fetching possible moves. Error: " + error);
+                            }
+                        });
+                    }
                 }
             });
         });
 
+
         // ? Обновление доски после хода
         function updateBoard(gameState) {
-            $(".chess-board td").empty();
+            // $(".chess-board td").each(function() {
+            //     $(this).html("<img src='/images/Empty.png' alt='Empty' />");
+            // });
 
             // Отображение белых фигур
             gameState.whiteFiguresList.forEach(function(figure) {
-                var cellId = figure.horizontalPos.toLowerCase() + (figure.verticalPos.ordinal() + 1);
+                var cellId = figure.horizontalPos.toLowerCase() + figure.verticalPos; // Используем просто figure.verticalPos
                 var figureImg = "<img src='/images/" + figure.typeFigure.toLowerCase() + "_" + figure.colorFigure.toLowerCase() + ".png' />";
                 $("#" + cellId).html(figureImg);
             });
 
             // Отображение черных фигур
             gameState.blackFiguresList.forEach(function(figure) {
-                var cellId = figure.horizontalPos.toLowerCase() + (figure.verticalPos.ordinal() + 1);
+                var cellId = figure.horizontalPos.toLowerCase() + figure.verticalPos; // Используем просто figure.verticalPos
                 var figureImg = "<img src='/images/" + figure.typeFigure.toLowerCase() + "_" + figure.colorFigure.toLowerCase() + ".png' />";
                 $("#" + cellId).html(figureImg);
             });
         }
+
 
         // ? Функция для очистки предыдущих подсветок
         function clearHighlights() {
@@ -124,18 +128,27 @@
                 <tr>
                     <#list FigurePositionLetterEnum as col>
                         <#assign isWhiteCell = (col?index + row?index) % 2 == 0>
+<#--                    TODO: поменялись местами фигуры (вверх ногами)   -->
                         <td class="${isWhiteCell?string('white', 'black')}" id="${col?lower_case}${row?index + 1}">
                             <#assign figureFound = false>
-                            <#list WhiteFiguresList + BlackFiguresList as figure>
-                                <#if figure.horizontalPos == col && figure.verticalPos == row>
-                                    <#assign imagePath = "/images/${figure.colorFigure?upper_case}_${figure.typeFigure?upper_case}.png">
-                                    <img src="${imagePath}" alt="${figure.colorFigure} ${figure.typeFigure}">
+                            <#list WhiteFiguresList as whiteFigure>
+                                <#if whiteFigure.horizontalPos == col && whiteFigure.verticalPos == row>
+                                    <#assign imagePath = "/images/${whiteFigure.colorFigure?upper_case}_${whiteFigure.typeFigure?upper_case}.png">
+                                    <img src="${imagePath}" alt="${whiteFigure.colorFigure} ${whiteFigure.typeFigure}">
+                                    <#assign figureFound = true>
+                                    <#break>
+                                </#if>
+                            </#list>
+                            <#list BlackFiguresList as blackFigure>
+                                <#if blackFigure.horizontalPos == col && blackFigure.verticalPos == row>
+                                    <#assign imagePath = "/images/${blackFigure.colorFigure?upper_case}_${blackFigure.typeFigure?upper_case}.png">
+                                    <img src="${imagePath}" alt="${blackFigure.colorFigure} ${blackFigure.typeFigure}">
                                     <#assign figureFound = true>
                                     <#break>
                                 </#if>
                             </#list>
                             <#if !figureFound>
-                                &nbsp;
+                                <img src="/images/Empty.png" alt="Empty">
                             </#if>
                         </td>
                     </#list>
@@ -144,6 +157,7 @@
         </table>
     </div>
 </div>
+
 
 
 </body>

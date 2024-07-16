@@ -23,53 +23,56 @@ public class GameState {
     }
 
     private void initializeFigures() {
-        // * Инициализация белых фигур
-        // ? Пешки
+        // Инициализация белых фигур
+        // Пешки
         for (FigurePositionLetterEnum letter : FigurePositionLetterEnum.values()) {
             WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.PAWN, letter, FigurePositionNumberEnum.TWO, true));
         }
 
-        // ? Ладья
+        // Ладьи
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.ROCK, FigurePositionLetterEnum.A, FigurePositionNumberEnum.ONE, true));
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.ROCK, FigurePositionLetterEnum.H, FigurePositionNumberEnum.ONE, true));
 
-        // ? Конь
+        // Кони
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.KNIGHT, FigurePositionLetterEnum.B, FigurePositionNumberEnum.ONE, true));
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.KNIGHT, FigurePositionLetterEnum.G, FigurePositionNumberEnum.ONE, true));
 
-        // ? Слон
+        // Слоны
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.BISHOP, FigurePositionLetterEnum.C, FigurePositionNumberEnum.ONE, true));
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.BISHOP, FigurePositionLetterEnum.F, FigurePositionNumberEnum.ONE, true));
 
-        // ? Королева
+        // Королева
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.QUEEN, FigurePositionLetterEnum.D, FigurePositionNumberEnum.ONE, true));
-        // ? Король
+
+        // Король
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.KING, FigurePositionLetterEnum.E, FigurePositionNumberEnum.ONE, true));
 
 
-        // * Инициализация черных фигур
-        // ? Пешки
+        // Инициализация черных фигур
+        // Пешки
         for (FigurePositionLetterEnum letter : FigurePositionLetterEnum.values()) {
             BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.PAWN, letter, FigurePositionNumberEnum.SEVEN, true));
         }
 
-        // ? Ладья
+        // Ладьи
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.ROCK, FigurePositionLetterEnum.A, FigurePositionNumberEnum.EIGHT, true));
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.ROCK, FigurePositionLetterEnum.H, FigurePositionNumberEnum.EIGHT, true));
 
-        // ? Конь
+        // Кони
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.KNIGHT, FigurePositionLetterEnum.B, FigurePositionNumberEnum.EIGHT, true));
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.KNIGHT, FigurePositionLetterEnum.G, FigurePositionNumberEnum.EIGHT, true));
 
-        // ? Слон
+        // Слоны
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.BISHOP, FigurePositionLetterEnum.C, FigurePositionNumberEnum.EIGHT, true));
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.BISHOP, FigurePositionLetterEnum.F, FigurePositionNumberEnum.EIGHT, true));
 
-        // ? Королева
+        // Королева
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.QUEEN, FigurePositionLetterEnum.D, FigurePositionNumberEnum.EIGHT, true));
-        // ? Король
+
+        // Король
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.KING, FigurePositionLetterEnum.E, FigurePositionNumberEnum.EIGHT, true));
     }
+
 
     // * ПОЛУЧЕНИЕ ВСЕХ ВОЗМОЖНЫХ ХОДОВ ДЛЯ ЛЮБОЙ ФИГУРЫ
     public List<Move> getPossibleMoves(Figure figure) {
@@ -86,11 +89,24 @@ public class GameState {
 
     // * Получение фигуры по позиции
     public Figure getFigureAtPosition(FigurePositionLetterEnum col, FigurePositionNumberEnum row) {
-        return Stream.concat(WhiteFiguresList.stream(), BlackFiguresList.stream())
-                .filter(figure -> figure.getHorizontalPos() == col && figure.getVerticalPos() == row)
-                .findFirst()
-                .orElse(null);
+        for (Figure figure : WhiteFiguresList) {
+            if (figure.getHorizontalPos() == col && figure.getVerticalPos() == row) {
+                return figure;
+            }
+        }
+        for (Figure figure : BlackFiguresList) {
+            if (figure.getHorizontalPos() == col && figure.getVerticalPos() == row) {
+                return figure;
+            }
+        }
+        return null;
     }
+
+    public void addFigureAtPosition(Figure figure) {
+        List<Figure> targetFigures = figure.getColorFigure() == FigureColorEnum.WHITE ? WhiteFiguresList : BlackFiguresList;
+        targetFigures.add(figure);
+    }
+
 
     // * Логика для слона
     private List<Move> getBishopMoves(Figure figure) {

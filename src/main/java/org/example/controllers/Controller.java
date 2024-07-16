@@ -1,10 +1,7 @@
 package org.example.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.example.models.Figure;
-import org.example.models.FigurePositionLetterEnum;
-import org.example.models.FigurePositionNumberEnum;
-import org.example.models.Move;
+import org.example.models.*;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,7 +36,6 @@ public class Controller {
         model.addAttribute("WhiteFiguresList", game.getWhiteFiguresList());
         model.addAttribute("FigurePositionLetterEnum", FigurePositionLetterEnum.values());
         model.addAttribute("FigurePositionNumberEnum", FigurePositionNumberEnum.values());
-        System.out.println("MAIN-PAGE LOADED");
         return "main-page";
     }
 
@@ -96,7 +92,7 @@ public class Controller {
             FigurePositionLetterEnum targetCol = FigurePositionLetterEnum.valueOf(Character.toString(targetLetter).toUpperCase());
             FigurePositionNumberEnum targetRow = FigurePositionNumberEnum.values()[targetNumber - 1];
 
-            System.out.println("sourceCol:" + sourceCol + "\tsourceRow: " + sourceRow);
+            System.out.println("Figure source: " + sourceCol + "_" + sourceRow);
             Figure figure = game.getFigureAtPosition(sourceCol, sourceRow);
 
             if (figure != null) {
@@ -105,26 +101,34 @@ public class Controller {
                         move.getNewHorizontalPos() == targetCol && move.getNewVerticalPos() == targetRow);
 
                 if (isValidMove) {
-                    // Перемещение фигуры
+                    // Удаляем фигуру из текущего списка
+                    game.removeFigureAtPosition(sourceCol, sourceRow, figure.getColorFigure());
+
+                    // Обновляем позицию фигуры
                     figure.setHorizontalPos(targetCol);
                     figure.setVerticalPos(targetRow);
 
-                    // Удаление фигуры противника, если есть
-                    game.removeFigureAtPosition(targetCol, targetRow, figure.getColorFigure());
+                    // Добавляем фигуру в список по новой позиции
+                    game.addFigureAtPosition(figure);
 
-                    System.out.println("setVerticalPos: " + targetRow + "\tsetHorizontalPos" + targetCol);
+                    System.out.println("Moved figure ->\nColor: " + figure.getColorFigure() + "\nType: " + figure.getTypeFigure());
+                    System.out.println("Figure moved to: " + targetCol + "_" + targetRow + "\n");
 
                     return ResponseEntity.ok(game);
                 } else {
+                    System.out.println("Invalid move attempted");
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 }
             } else {
+                System.out.println("No figure found at source position");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 
 
 
