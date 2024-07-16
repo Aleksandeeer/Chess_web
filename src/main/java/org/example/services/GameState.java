@@ -71,6 +71,13 @@ public class GameState {
 
         // Король
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.KING, FigurePositionLetterEnum.E, FigurePositionNumberEnum.EIGHT, true));
+
+//        for (int i = 0; i < 16; i++) {
+//            System.out.println(getWhiteFiguresList().get(i).getHorizontalPos() + "_" + getWhiteFiguresList().get(i).getVerticalPos()
+//                    + " " + getWhiteFiguresList().get(i).getColorFigure() + "_" + getWhiteFiguresList().get(i).getTypeFigure());
+//            System.out.println(getBlackFiguresList().get(i).getHorizontalPos() + "_" + getBlackFiguresList().get(i).getVerticalPos()
+//                    + " " + getBlackFiguresList().get(i).getColorFigure() + "_" + getBlackFiguresList().get(i).getTypeFigure());
+//        }
     }
 
 
@@ -332,8 +339,8 @@ public class GameState {
     }
 
     public void removeFigureAtPosition(FigurePositionLetterEnum col, FigurePositionNumberEnum row, FigureColorEnum currentColor) {
-        List<Figure> opponentFigures = currentColor == FigureColorEnum.WHITE ? BlackFiguresList : WhiteFiguresList;
-        opponentFigures.removeIf(f -> f.getHorizontalPos() == col && f.getVerticalPos() == row);
+        List<Figure> Figures = currentColor == FigureColorEnum.WHITE ? WhiteFiguresList : BlackFiguresList;
+        Figures.removeIf(f -> f.getHorizontalPos() == col && f.getVerticalPos() == row);
     }
 
 

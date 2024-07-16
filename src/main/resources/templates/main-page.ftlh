@@ -35,9 +35,9 @@
                                 target: targetCellId
                             },
                             success: function(response) {
-                                clearHighlights(); // Очистка предыдущих подсветок
+                                clearHighlights();
                                 updateBoard(response);
-                                selectedFigure = null; // Сбрасываем выбранную фигуру после успешного хода
+                                selectedFigure = null;
                             },
                             error: function(xhr, status, error) {
                                 alert("Error moving figure. Error: " + error);
@@ -74,23 +74,31 @@
 
         // ? Обновление доски после хода
         function updateBoard(gameState) {
-            // $(".chess-board td").each(function() {
-            //     $(this).html("<img src='/images/Empty.png' alt='Empty' />");
-            // });
+            var whiteFigures = gameState.whiteFiguresList;
+            var blackFigures = gameState.blackFiguresList;
 
-            // Отображение белых фигур
-            gameState.whiteFiguresList.forEach(function(figure) {
-                var cellId = figure.horizontalPos.toLowerCase() + figure.verticalPos; // Используем просто figure.verticalPos
-                var figureImg = "<img src='/images/" + figure.typeFigure.toLowerCase() + "_" + figure.colorFigure.toLowerCase() + ".png' />";
-                $("#" + cellId).html(figureImg);
+            // Очистка доски
+            $(".chess-board td").each(function() {
+                $(this).empty().append('<img src="/images/Empty.png" alt="Empty">');
             });
 
-            // Отображение черных фигур
-            gameState.blackFiguresList.forEach(function(figure) {
-                var cellId = figure.horizontalPos.toLowerCase() + figure.verticalPos; // Используем просто figure.verticalPos
-                var figureImg = "<img src='/images/" + figure.typeFigure.toLowerCase() + "_" + figure.colorFigure.toLowerCase() + ".png' />";
-                $("#" + cellId).html(figureImg);
+            // Размещение белых фигур
+            whiteFigures.forEach(function(figure) {
+                var cellId = figure.horizontalPos.toLowerCase() + (8 - figure.verticalPos);
+                var imagePath = "/images/" + figure.colorFigure.toUpperCase() + "_" + figure.typeFigure.toUpperCase() + ".png";
+                // console.log("image_path: " + imagePath);
+                $("#" + cellId).empty().append('<img src="' + imagePath + '" alt="' + figure.colorFigure + ' ' + figure.typeFigure + '">');
             });
+
+            // Размещение черных фигур
+            blackFigures.forEach(function(figure) {
+                var cellId = figure.horizontalPos.toLowerCase() + (8 - figure.verticalPos);
+                var imagePath = "/images/" + figure.colorFigure.toUpperCase() + "_" + figure.typeFigure.toUpperCase() + ".png";
+                // console.log("image_path: " + imagePath);
+                $("#" + cellId).empty().append('<img src="' + imagePath + '" alt="' + figure.colorFigure + ' ' + figure.typeFigure + '">');
+            });
+
+            location.reload();
         }
 
 
@@ -124,29 +132,37 @@
 <div class="box">
     <div class="centered">
         <table class="chess-board">
-            <#list FigurePositionNumberEnum?reverse as row>
+            <#list FigurePositionNumberEnum as row>
                 <tr>
                     <#list FigurePositionLetterEnum as col>
                         <#assign isWhiteCell = (col?index + row?index) % 2 == 0>
-<#--                    TODO: поменялись местами фигуры (вверх ногами)   -->
-                        <td class="${isWhiteCell?string('white', 'black')}" id="${col?lower_case}${row?index + 1}">
+                        <!-- Применяем зеркальную нумерацию строк -->
+                        <td class="${isWhiteCell?string('white', 'black')}" id="${col?lower_case}${(8 - row?index)}">
                             <#assign figureFound = false>
+
+                            <!-- Перебираем белые фигуры -->
                             <#list WhiteFiguresList as whiteFigure>
-                                <#if whiteFigure.horizontalPos == col && whiteFigure.verticalPos == row>
-                                    <#assign imagePath = "/images/${whiteFigure.colorFigure?upper_case}_${whiteFigure.typeFigure?upper_case}.png">
-                                    <img src="${imagePath}" alt="${whiteFigure.colorFigure} ${whiteFigure.typeFigure}">
+                                <!-- Применяем зеркальную логику для сравнения позиции -->
+                                <#if whiteFigure.getHorizontalPos() == col && whiteFigure.getVerticalPos().ordinal() == (7 - row?index)>
+                                    <#assign imagePath = "/images/${whiteFigure.getColorFigure()?upper_case}_${whiteFigure.getTypeFigure()?upper_case}.png">
+                                    <img src="${imagePath}" alt="${whiteFigure.getColorFigure()} ${whiteFigure.getTypeFigure()}">
                                     <#assign figureFound = true>
                                     <#break>
                                 </#if>
                             </#list>
+
+                            <!-- Перебираем черные фигуры -->
                             <#list BlackFiguresList as blackFigure>
-                                <#if blackFigure.horizontalPos == col && blackFigure.verticalPos == row>
-                                    <#assign imagePath = "/images/${blackFigure.colorFigure?upper_case}_${blackFigure.typeFigure?upper_case}.png">
-                                    <img src="${imagePath}" alt="${blackFigure.colorFigure} ${blackFigure.typeFigure}">
+                                <!-- Применяем зеркальную логику для сравнения позиции -->
+                                <#if blackFigure.getHorizontalPos() == col && blackFigure.getVerticalPos().ordinal() == (7 - row?index)>
+                                    <#assign imagePath = "/images/${blackFigure.getColorFigure()?upper_case}_${blackFigure.getTypeFigure()?upper_case}.png">
+                                    <img src="${imagePath}" alt="${blackFigure.getColorFigure()} ${blackFigure.getTypeFigure()}">
                                     <#assign figureFound = true>
                                     <#break>
                                 </#if>
                             </#list>
+
+                            <!-- Если фигура не найдена -->
                             <#if !figureFound>
                                 <img src="/images/Empty.png" alt="Empty">
                             </#if>
@@ -157,6 +173,7 @@
         </table>
     </div>
 </div>
+
 
 
 
