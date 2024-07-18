@@ -13,7 +13,7 @@ public class GameState {
     List<Figure> WhiteFiguresList;
     List<Figure> BlackFiguresList;
 
-    Boolean turnOfTheMove;
+    Boolean turnOfTheMove = true; // * true - WHITE, false - BLACK
 
     public GameState() {
         this.WhiteFiguresList = new ArrayList<>();
@@ -22,7 +22,7 @@ public class GameState {
     }
 
     private void initializeFigures() {
-        // Инициализация белых фигур
+        // ? Инициализация белых фигур
         // Пешки
         for (FigurePositionLetterEnum letter : FigurePositionLetterEnum.values()) {
             WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.PAWN, letter, FigurePositionNumberEnum.TWO, true));
@@ -47,7 +47,7 @@ public class GameState {
         WhiteFiguresList.add(new Figure(FigureColorEnum.WHITE, FigureTypeEnum.KING, FigurePositionLetterEnum.E, FigurePositionNumberEnum.ONE, true));
 
 
-        // Инициализация черных фигур
+        // ? Инициализация черных фигур
         // Пешки
         for (FigurePositionLetterEnum letter : FigurePositionLetterEnum.values()) {
             BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.PAWN, letter, FigurePositionNumberEnum.SEVEN, true));
@@ -70,13 +70,6 @@ public class GameState {
 
         // Король
         BlackFiguresList.add(new Figure(FigureColorEnum.BLACK, FigureTypeEnum.KING, FigurePositionLetterEnum.E, FigurePositionNumberEnum.EIGHT, true));
-
-//        for (int i = 0; i < 16; i++) {
-//            System.out.println(getWhiteFiguresList().get(i).getHorizontalPos() + "_" + getWhiteFiguresList().get(i).getVerticalPos()
-//                    + " " + getWhiteFiguresList().get(i).getColorFigure() + "_" + getWhiteFiguresList().get(i).getTypeFigure());
-//            System.out.println(getBlackFiguresList().get(i).getHorizontalPos() + "_" + getBlackFiguresList().get(i).getVerticalPos()
-//                    + " " + getBlackFiguresList().get(i).getColorFigure() + "_" + getBlackFiguresList().get(i).getTypeFigure());
-//        }
     }
 
 

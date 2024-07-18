@@ -18,6 +18,7 @@
                 var imgElement = parentCell.find("img").get(0);
 
                 if (selectedFigure) {
+                    // todo: здесь багулина со сменой хода
                     var targetCellId = parentCell.attr("id");
 
                     // Проверяем, является ли targetCellId допустимым ходом
@@ -127,7 +128,7 @@
             background-color: yellow !important; /* Используем !important для приоритета над .white и .black */
         }
     </style>
-</head>
+</head
 <body>
 
 <div class="box">

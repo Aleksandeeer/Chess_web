@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,7 +57,7 @@ public class Controller {
         }
     }
 
-    // * получения возможных ходов
+    // * Получения возможных ходов
     @GetMapping("/possible-moves/{position}")
     public ResponseEntity<List<String>> getPossibleMoves(@PathVariable("position") String position) {
         char letter = position.charAt(0);
@@ -68,11 +69,18 @@ public class Controller {
         Figure figure = game.getFigureAtPosition(col, row);
 
         if (figure != null) {
-            List<Move> possibleMoves = game.getPossibleMoves(figure);
-            List<String> movePositions = possibleMoves.stream()
-                    .map(move -> move.getDestination().toLowerCase())
-                    .collect(Collectors.toList());
+            List<String> movePositions = new ArrayList<>();
 
+            // ? Проверка, что ходит правильный цвет
+            if ((game.getTurnOfTheMove() && figure.getColorFigure() == FigureColorEnum.WHITE) ||
+                    (!game.getTurnOfTheMove() && figure.getColorFigure() == FigureColorEnum.BLACK)) {
+                List<Move> possibleMoves = game.getPossibleMoves(figure);
+                movePositions = possibleMoves.stream()
+                        .map(move -> move.getDestination().toLowerCase())
+                        .collect(Collectors.toList());
+            }
+
+            // ? Если ход правильный, то вернется ход возможных ходов. Иначе пустой лист
             return ResponseEntity.ok(movePositions);
         } else {
             return ResponseEntity.notFound().build();
@@ -95,30 +103,41 @@ public class Controller {
             Figure figure = game.getFigureAtPosition(sourceCol, sourceRow);
 
             if (figure != null) {
-                List<Move> possibleMoves = game.getPossibleMoves(figure);
-                boolean isValidMove = possibleMoves.stream().anyMatch(move ->
-                        move.getNewHorizontalPos() == targetCol && move.getNewVerticalPos() == targetRow);
-                // ? Если ход возможен
-                if (isValidMove) {
-                    // ? Удаление фигуры противника
-                    Figure enemyFigure = game.getFigureAtPosition(targetCol, targetRow);
-                    if (enemyFigure != null && enemyFigure.getColorFigure() != figure.getColorFigure()) {
-                        game.removeFigureAtPosition(targetCol, targetRow, game.getFigureAtPosition(targetCol, targetRow).getColorFigure());
+                // ? Проверка, что ходит правильный цвет
+                if ((game.getTurnOfTheMove() && figure.getColorFigure() == FigureColorEnum.WHITE) ||
+                        (!game.getTurnOfTheMove() && figure.getColorFigure() == FigureColorEnum.BLACK)) {
+
+                    List<Move> possibleMoves = game.getPossibleMoves(figure);
+                    boolean isValidMove = possibleMoves.stream().anyMatch(move ->
+                            move.getNewHorizontalPos() == targetCol && move.getNewVerticalPos() == targetRow);
+
+                    // ? Если ход возможен
+                    if (isValidMove) {
+                        // ? Удаление фигуры противника
+                        Figure enemyFigure = game.getFigureAtPosition(targetCol, targetRow);
+                        if (enemyFigure != null && enemyFigure.getColorFigure() != figure.getColorFigure()) {
+                            game.removeFigureAtPosition(targetCol, targetRow, game.getFigureAtPosition(targetCol, targetRow).getColorFigure());
+                        }
+
+                        // ? Удаление фигуры с текущей позиции
+                        game.removeFigureAtPosition(sourceCol, sourceRow, figure.getColorFigure());
+
+                        // ? Установка на новые координаты
+                        figure.setHorizontalPos(targetCol);
+                        figure.setVerticalPos(targetRow);
+
+                        // ? Добавление фигуры обратно на поле
+                        game.addFigureAtPosition(figure);
+
+                        // ? Переход хода
+                        game.setTurnOfTheMove(!game.getTurnOfTheMove());
+
+                        return ResponseEntity.ok(game);
+                    } else {
+                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                     }
-
-                    // ? Удаление фигуры с текущей позиции
-                    game.removeFigureAtPosition(sourceCol, sourceRow, figure.getColorFigure());
-
-                    // ? Установка на новые координаты
-                    figure.setHorizontalPos(targetCol);
-                    figure.setVerticalPos(targetRow);
-
-                    // ? Добавление фигуры обратно на поле
-                    game.addFigureAtPosition(figure);
-
-                    return ResponseEntity.ok(game);
                 } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Не правильный цвет
                 }
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -128,4 +147,5 @@ public class Controller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
 }
