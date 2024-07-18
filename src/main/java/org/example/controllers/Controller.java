@@ -37,6 +37,7 @@ public class Controller {
         model.addAttribute("WhiteFiguresList", game.getWhiteFiguresList());
         model.addAttribute("FigurePositionLetterEnum", FigurePositionLetterEnum.values());
         model.addAttribute("FigurePositionNumberEnum", FigurePositionNumberEnum.values());
+        model.addAttribute("turnOfTheMove", game.getTurnOfTheMove());
         return "main-page";
     }
 
@@ -131,6 +132,7 @@ public class Controller {
 
                         // ? Переход хода
                         game.setTurnOfTheMove(!game.getTurnOfTheMove());
+                        System.out.println(game.getTurnOfTheMove());
 
                         return ResponseEntity.ok(game);
                     } else {
@@ -148,4 +150,9 @@ public class Controller {
         }
     }
 
+    @GetMapping("/winner/{color}")
+    public String gameWinner(@PathVariable FigureColorEnum winnerColor, Model model) {
+        model.addAttribute("winnerColor", winnerColor);
+        return "winner-page";
+    }
 }

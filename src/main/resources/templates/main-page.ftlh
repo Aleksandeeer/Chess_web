@@ -4,6 +4,7 @@
     <title>Chess Board</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../css/board.css">
+    <link rel="stylesheet" href="../css/turn_indicator.css">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -18,10 +19,8 @@
                 var imgElement = parentCell.find("img").get(0);
 
                 if (selectedFigure) {
-                    // todo: здесь багулина со сменой хода
+                    // todo: здесь багулина со сменой хода (была)
                     var targetCellId = parentCell.attr("id");
-
-                    // Проверяем, является ли targetCellId допустимым ходом
                     var isValidMove = possibleMoves.includes(targetCellId);
 
                     if (isValidMove) {
@@ -88,7 +87,6 @@
             whiteFigures.forEach(function(figure) {
                 var cellId = figure.horizontalPos.toLowerCase() + (8 - figure.verticalPos);
                 var imagePath = "/images/" + figure.colorFigure.toUpperCase() + "_" + figure.typeFigure.toUpperCase() + ".png";
-                // console.log("image_path: " + imagePath);
                 $("#" + cellId).empty().append('<img src="' + imagePath + '" alt="' + figure.colorFigure + ' ' + figure.typeFigure + '">');
             });
 
@@ -96,7 +94,6 @@
             blackFigures.forEach(function(figure) {
                 var cellId = figure.horizontalPos.toLowerCase() + (8 - figure.verticalPos);
                 var imagePath = "/images/" + figure.colorFigure.toUpperCase() + "_" + figure.typeFigure.toUpperCase() + ".png";
-                // console.log("image_path: " + imagePath);
                 $("#" + cellId).empty().append('<img src="' + imagePath + '" alt="' + figure.colorFigure + ' ' + figure.typeFigure + '">');
             });
 
@@ -128,7 +125,7 @@
             background-color: yellow !important; /* Используем !important для приоритета над .white и .black */
         }
     </style>
-</head
+</head>
 <body>
 
 <div class="box">
@@ -171,6 +168,17 @@
         </table>
     </div>
 </div>
+
+<#--Индикатор хода-->
+<#if turnOfTheMove == true>
+    <div class="turn-indicator">
+        Сейчас ход: <span id="turn-indicator-text" class="white-turn">Белые</span>
+    </div>
+<#else>
+    <div class="turn-indicator">
+        Сейчас ход: <span id="turn-indicator-text" class="black-turn">Черные</span>
+    </div>
+</#if>
 
 
 
