@@ -92,35 +92,35 @@ public class Controller {
             FigurePositionLetterEnum targetCol = FigurePositionLetterEnum.valueOf(Character.toString(targetLetter).toUpperCase());
             FigurePositionNumberEnum targetRow = FigurePositionNumberEnum.values()[targetNumber - 1];
 
-            System.out.println("Figure source: " + sourceCol + "_" + sourceRow);
             Figure figure = game.getFigureAtPosition(sourceCol, sourceRow);
 
             if (figure != null) {
                 List<Move> possibleMoves = game.getPossibleMoves(figure);
                 boolean isValidMove = possibleMoves.stream().anyMatch(move ->
                         move.getNewHorizontalPos() == targetCol && move.getNewVerticalPos() == targetRow);
-
+                // ? Если ход возможен
                 if (isValidMove) {
-                    // Удаляем фигуру из текущего списка
+                    // ? Удаление фигуры противника
+                    Figure enemyFigure = game.getFigureAtPosition(targetCol, targetRow);
+                    if (enemyFigure != null && enemyFigure.getColorFigure() != figure.getColorFigure()) {
+                        game.removeFigureAtPosition(targetCol, targetRow, game.getFigureAtPosition(targetCol, targetRow).getColorFigure());
+                    }
+
+                    // ? Удаление фигуры с текущей позиции
                     game.removeFigureAtPosition(sourceCol, sourceRow, figure.getColorFigure());
 
-                    // Обновляем позицию фигуры
+                    // ? Установка на новые координаты
                     figure.setHorizontalPos(targetCol);
                     figure.setVerticalPos(targetRow);
 
-                    // Добавляем фигуру в список по новой позиции
+                    // ? Добавление фигуры обратно на поле
                     game.addFigureAtPosition(figure);
-
-                    System.out.println("Moved figure ->\nColor: " + figure.getColorFigure() + "\nType: " + figure.getTypeFigure());
-                    System.out.println("Figure moved to: " + targetCol + "_" + targetRow + "\n");
 
                     return ResponseEntity.ok(game);
                 } else {
-                    System.out.println("Invalid move attempted");
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 }
             } else {
-                System.out.println("No figure found at source position");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
         } catch (Exception e) {
@@ -128,8 +128,4 @@ public class Controller {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
-
-
-
 }

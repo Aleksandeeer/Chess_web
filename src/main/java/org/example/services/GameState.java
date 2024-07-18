@@ -6,7 +6,6 @@ import org.example.models.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -338,6 +337,8 @@ public class GameState {
         return opponentFigures.stream().anyMatch(f -> f.getHorizontalPos() == horizontal && f.getVerticalPos() == vertical);
     }
 
+    // TODO: сделать удаление фигуры противника
+    // * Удаление фигуры по позиции
     public void removeFigureAtPosition(FigurePositionLetterEnum col, FigurePositionNumberEnum row, FigureColorEnum currentColor) {
         List<Figure> Figures = currentColor == FigureColorEnum.WHITE ? WhiteFiguresList : BlackFiguresList;
         Figures.removeIf(f -> f.getHorizontalPos() == col && f.getVerticalPos() == row);

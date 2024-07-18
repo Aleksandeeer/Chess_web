@@ -11,7 +11,7 @@
         var selectedFigure = null;
         var possibleMoves = [];
 
-        // ? Подсветка возможных ходов при нажатии на фигуру
+        // ? Ход фигуры
         $(document).ready(function() {
             $(".chess-board td").click(function() {
                 var parentCell = $(this);
@@ -46,7 +46,8 @@
                     } else {
                         console.log("Invalid move to cell: " + targetCellId);
                     }
-                } else {
+
+                } else { // ? Подсветка возможных ходов при нажатии на фигуру
                     if (imgElement) { // Проверка, что клик был по фигуре
                         var cellId = parentCell.attr("id");
                         selectedFigure = cellId;
@@ -72,7 +73,7 @@
         });
 
 
-        // ? Обновление доски после хода
+        // ? Апдейт доски после хода
         function updateBoard(gameState) {
             var whiteFigures = gameState.whiteFiguresList;
             var blackFigures = gameState.blackFiguresList;
@@ -123,7 +124,7 @@
     </script>
     <style>
         .highlight {
-            background-color: yellow !important; /* Используем !important для приоритета */
+            background-color: yellow !important; /* Используем !important для приоритета над .white и .black */
         }
     </style>
 </head>
@@ -136,13 +137,11 @@
                 <tr>
                     <#list FigurePositionLetterEnum as col>
                         <#assign isWhiteCell = (col?index + row?index) % 2 == 0>
-                        <!-- Применяем зеркальную нумерацию строк -->
+                        <!-- Зеркальная нумерация строк -->
                         <td class="${isWhiteCell?string('white', 'black')}" id="${col?lower_case}${(8 - row?index)}">
                             <#assign figureFound = false>
 
-                            <!-- Перебираем белые фигуры -->
                             <#list WhiteFiguresList as whiteFigure>
-                                <!-- Применяем зеркальную логику для сравнения позиции -->
                                 <#if whiteFigure.getHorizontalPos() == col && whiteFigure.getVerticalPos().ordinal() == (7 - row?index)>
                                     <#assign imagePath = "/images/${whiteFigure.getColorFigure()?upper_case}_${whiteFigure.getTypeFigure()?upper_case}.png">
                                     <img src="${imagePath}" alt="${whiteFigure.getColorFigure()} ${whiteFigure.getTypeFigure()}">
@@ -151,9 +150,7 @@
                                 </#if>
                             </#list>
 
-                            <!-- Перебираем черные фигуры -->
                             <#list BlackFiguresList as blackFigure>
-                                <!-- Применяем зеркальную логику для сравнения позиции -->
                                 <#if blackFigure.getHorizontalPos() == col && blackFigure.getVerticalPos().ordinal() == (7 - row?index)>
                                     <#assign imagePath = "/images/${blackFigure.getColorFigure()?upper_case}_${blackFigure.getTypeFigure()?upper_case}.png">
                                     <img src="${imagePath}" alt="${blackFigure.getColorFigure()} ${blackFigure.getTypeFigure()}">
@@ -162,7 +159,7 @@
                                 </#if>
                             </#list>
 
-                            <!-- Если фигура не найдена -->
+                            <!-- Пустые клетки -->
                             <#if !figureFound>
                                 <img src="/images/Empty.png" alt="Empty">
                             </#if>
